@@ -42,8 +42,8 @@ namespace QuizSupp
 		{
 			m_page = page;
 			sPathRoot = sPath;
-		    m_sCounterConnString = ConfigurationManager.AppSettings["Thetasoft.QuizSupp.Counter.ConnectionString"];
-            m_sQuestionsConnString = ConfigurationManager.AppSettings["Thetasoft.QuizSupp.Questions.ConnectionString"];
+		    m_sCounterConnString = ConfigurationManager.AppSettings["Thetasoft.Azure.ConnectionString"];
+            m_sQuestionsConnString = ConfigurationManager.AppSettings["Thetasoft.Azure.ConnectionString"];
 		}
 			
 		/* G E T  N A M E D  C O U N T E R */
