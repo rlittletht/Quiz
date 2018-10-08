@@ -57,8 +57,8 @@ namespace QuizSupp
 		{
 			m_page.Trace.Warn("command: ");
 			int nCount = 0;
-			try
-				{
+			//try
+//				{
 				OleDbConnection oConn = new OleDbConnection(m_sCounterConnString);
                     
 				m_page.Trace.Write("Connect=" + oConn.ConnectionString + " (User=" +Environment.UserName);
@@ -74,8 +74,8 @@ namespace QuizSupp
 				oReader.Close();
 				oCmd = null;
 				oConn.Close();
-				}
-			catch (Exception exc) { nCount = -1; };
+	//			}
+			//catch (Exception exc) { nCount = -1; };
 			
 			return nCount;
 		}
@@ -345,36 +345,42 @@ namespace QuizSupp
 
 			oConn.Open();
 
-			OleDbCommand oCmd = oConn.CreateCommand();
-			string sCmd = "select * from quiz_Questions where id in (";
-			bool fFirst = true;
+		    try
+		        {
+			    OleDbCommand oCmd = oConn.CreateCommand();
 
-			foreach (MapQuestion mq in plmq)
-				{
-				if (!fFirst)
-					sCmd += ",";
+		        string sCmd = "select * from quiz_Questions where id in (";
+		        bool fFirst = true;
 
-				sCmd += mq.idQuestion.ToString();
-				fFirst = false;
-				}
+		        foreach (MapQuestion mq in plmq)
+		            {
+		            if (!fFirst)
+		                sCmd += ",";
 
-			sCmd += ") order by id";
-			oCmd.CommandText = sCmd;
+		            sCmd += mq.idQuestion.ToString();
+		            fFirst = false;
+		            }
 
-			OleDbDataReader oReader = oCmd.ExecuteReader();
+		        sCmd += ") order by id";
+		        oCmd.CommandText = sCmd;
 
-			int iQuestion = 0;
+		        OleDbDataReader oReader = oCmd.ExecuteReader();
 
-			while (oReader.Read())
-				{
-				Question q = QRead(oReader, 
-								   Int32.Parse(nvc.GetValues(((MapQuestion)plmq[iQuestion]).iKey)[0]),
-								   ((MapQuestion)plmq[iQuestion]).iQuestion);
+		        int iQuestion = 0;
 
-				plQuestions.Add(q);
-				iQuestion++;
-				}
+		        while (oReader.Read())
+		            {
+		            Question q = QRead(oReader,
+		                               Int32.Parse(nvc.GetValues(((MapQuestion) plmq[iQuestion]).iKey)[0]),
+		                               ((MapQuestion) plmq[iQuestion]).iQuestion);
 
+		            plQuestions.Add(q);
+		            iQuestion++;
+		            }
+		        }
+		    catch { }
+
+		    oConn.Close();
 			SortQuestionsByMap(ref plmq);
 			return true;
 
@@ -515,72 +521,78 @@ namespace QuizSupp
 
 			oConn.Open();
 
-			OleDbCommand oCmd = oConn.CreateCommand();
-            string sWhere;
-            
-            if (sDebugList != null && sDebugList.Length > 0)
-                {
-                sWhere = " WHERE id in (" + sDebugList + ") ";
-                }
-            else
-                {
-                sWhere = SBuildWhere(fMinors, fMajors, fJrSrBl, fSoftball, sLocal, fFed, fDiff1, fDiff2, fDiff3, fDiff4);
-                }
+		    try
+		        {
+		        OleDbCommand oCmd = oConn.CreateCommand();
+		        string sWhere;
+
+		        if (sDebugList != null && sDebugList.Length > 0)
+		            {
+		            sWhere = " WHERE id in (" + sDebugList + ") ";
+		            }
+		        else
+		            {
+		            sWhere = SBuildWhere(fMinors, fMajors, fJrSrBl, fSoftball, sLocal, fFed, fDiff1, fDiff2, fDiff3, fDiff4);
+		            }
 
 
-			oCmd.CommandText = "select count(*) from quiz_Questions " + sWhere;
-            m_page.Trace.Write("QuestionQuery=" + oCmd.CommandText);
-            int c = (int)oCmd.ExecuteScalar();
+		        oCmd.CommandText = "select count(*) from quiz_Questions " + sWhere;
+		        m_page.Trace.Write("QuestionQuery=" + oCmd.CommandText);
+		        int c = (int) oCmd.ExecuteScalar();
 
-			if (cQuestions > c) 
-				cQuestions = c;
-				
-			ArrayList plmq = new ArrayList();
-			ArrayList pln = new ArrayList(c);
+		        if (cQuestions > c)
+		            cQuestions = c;
 
-			for (int i = 0; i < c; i++)
-				{
-				pln.Add(i);
-				}
+		        ArrayList plmq = new ArrayList();
+		        ArrayList pln = new ArrayList(c);
 
-			Random rnd = new Random();
+		        for (int i = 0; i < c; i++)
+		            {
+		            pln.Add(i);
+		            }
 
-			// now, choose cQuestions random items from plnIdentity
-			for (int i = 0; i < cQuestions; i++)
-				{
-				int iRand = rnd.Next(0, (c - i - 1));
+		        Random rnd = new Random();
 
-				plmq.Add(new MapQuestion(i, (int)pln[iRand], i));
-				pln.RemoveAt(iRand);
-				}
+		        // now, choose cQuestions random items from plnIdentity
+		        for (int i = 0; i < cQuestions; i++)
+		            {
+		            int iRand = rnd.Next(0, (c - i - 1));
 
-			plmq.Sort(new SortMQId());
+		            plmq.Add(new MapQuestion(i, (int) pln[iRand], i));
+		            pln.RemoveAt(iRand);
+		            }
 
-            oCmd.CommandText = "select * from quiz_Questions " + sWhere;
+		        plmq.Sort(new SortMQId());
 
-			OleDbDataReader oReader = oCmd.ExecuteReader();
+		        oCmd.CommandText = "select * from quiz_Questions " + sWhere;
 
-			int iQuestion = 0;
-			int imq = 0;
+		        OleDbDataReader oReader = oCmd.ExecuteReader();
 
-			while (imq < plmq.Count && oReader.Read())
-				{
-				if (((MapQuestion)plmq[imq]).idQuestion == iQuestion)
-					{
-					// we can read this one
-                    Question q = QRead(oReader, -1, ((MapQuestion)plmq[imq]).iQuestion);
-					MapQuestion mq = (MapQuestion)plmq[imq];
-					mq.idQuestion = q.id;	// set it to the real id
-					plmq[imq] = mq;
+		        int iQuestion = 0;
+		        int imq = 0;
 
-					plQuestions.Add(q);
-					imq++;
-					}
-				iQuestion++;
-				}
+		        while (imq < plmq.Count && oReader.Read())
+		            {
+		            if (((MapQuestion) plmq[imq]).idQuestion == iQuestion)
+		                {
+		                // we can read this one
+		                Question q = QRead(oReader, -1, ((MapQuestion) plmq[imq]).iQuestion);
+		                MapQuestion mq = (MapQuestion) plmq[imq];
+		                mq.idQuestion = q.id; // set it to the real id
+		                plmq[imq] = mq;
 
-			SortQuestionsByMap(ref plmq);
-			return true;
+		                plQuestions.Add(q);
+		                imq++;
+		                }
+		            iQuestion++;
+		            }
+
+		        SortQuestionsByMap(ref plmq);
+		        }
+            catch { }
+
+		    oConn.Close();
+		    return true;
 		}
 
 		private string SFormatCount(string s, int c)

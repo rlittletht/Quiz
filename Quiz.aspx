@@ -220,6 +220,8 @@
 					<OPTION value="5" selected>5</OPTION>
 					<OPTION value="10">10</OPTION>
 					<OPTION value="15">15</OPTION>
+				    <OPTION value="25">25</OPTION>
+				    <OPTION value="50">50</OPTION>
 				</SELECT></P>
 				<div>Include questions for: (check all that apply)
 				<div style="margin-left:.5in">

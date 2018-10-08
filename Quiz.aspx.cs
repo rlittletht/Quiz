@@ -37,6 +37,7 @@ namespace quiz
 		{
 			QuizSupp.Support oSupp = new QuizSupp.Support((Page)this, Server.MapPath("."));
 
+
 			return oSupp.GetNamedCounter("QuizGen").ToString();
 		}
 
