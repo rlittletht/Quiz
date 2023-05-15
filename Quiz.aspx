@@ -31,11 +31,17 @@
 			var vsLeague = "<%=Request.QueryString["league"]%>";
 			var vsCount = "<%=Request.QueryString["count"]%>";
 			var vsLLOnly = "<%=Request.QueryString["llonly"]%>";
+			var vsFedOK = "<%=Request.QueryString["fedok"]%>";
+			var vsLocalOK = "<%=Request.QueryString["localok"]%>";
+            var vsDebugOK = "<%=Request.QueryString["debugok"]%>";
 
 			var vcCount = (vsCount == "" ? 0 : 0 + vsCount);
 			var vfLLOnly = (vsLLOnly == "" ? false : true);
+            var vfFedOK = (vsFedOK != "" && !vfLLOnly);
+			var vfLocalOK = (vsLocalOK != "");
+			var vfDebugOK = (vsDebugOK != "");
 
-			/* G E T  C B X  V A L */
+            /* G E T  C B X  V A L */
 			/*----------------------------------------------------------------------------
 				%%Function: GetCbxVal
 				%%Contact: rlittle
@@ -111,11 +117,23 @@
             {
 				SetFormVal("idQuizParms", "<%=QueryString()%>");
 
-                if (vfLLOnly == true)
+				if (!vfLocalOK)
+                {
+					var oPLocal = document.getElementById("idPLocalRules");
+
+                    oPLocal.style.display = "none";
+				}
+				if (!vfDebugOK)
+                {
+					var oPDebug = document.getElementById("idPShowDebug");
+
+                    oPDebug.style.display = "none";
+                }
+                if (vfLLOnly == true || vfFedOK != true)
                     {
 					var oTrFed = document.getElementById("idTrFedRules");
 
-					oTrFed.style.visibility = "hidden";
+                    oTrFed.style.display = "none";
                     }
 
 				if (vsLeague != "")
@@ -133,7 +151,7 @@
                     }
             }
 
-		</script>
+        </script>
 	</HEAD>
 	<body lang="en-us" onload="OnLoadComplete()">
 		<P align="center"><FONT face="Verdana" color="#0000ff" size="5">
@@ -170,7 +188,7 @@
 			<p>
 				Some of these questions are specific to High School or Little League, a particular level of Little League or even
 				a specific local Little League.  You can choose to filter out these questions using the options below.  If a question 
-				doesn't apply to all basball/softball, it will note what it does apply to.&nbsp; (If nothing is noted, the rule is 
+				doesn't apply to all baseball/softball, it will note what it does apply to.&nbsp; (If nothing is noted, the rule is 
 				the same for all associations, all levels)
 			</p>
 			<p>
@@ -223,26 +241,47 @@
 				    <OPTION value="25">25</OPTION>
 				    <OPTION value="50">50</OPTION>
 				</SELECT></P>
-				<div>Include questions for: (check all that apply)
+				<div>Choose division levels(check all that apply)
 				<div style="margin-left:.5in">
-				<table border=0 cellpadding=3 ><tr>
+			
+				<table border=0 cellpadding=3 >
 				<tr>
-				<td><input type=checkbox checked name="Minors"/>
-                    Little League Minors<td><input type=checkbox checked name="Majors"/>
-                    Little League
-                    Majors<tr>
-				<td><input type=checkbox checked name="JrSrBl"/>
-                    Junior/Senior/Big League<td><input type=checkbox checked name="Softball"/>
-                        Little League
-                    Softball</tr>
-				<tr id="idTrFedRules" runat="server">
-				<td><input type=checkbox checked name="Fed"/>
-                    NFHS (<i>Fed/High School</i>)</td>
-				</tr>
+    				<td> <input type=checkbox checked name="Minors"/>Little League Minors
+                    <td colspan="2"> <input type=checkbox checked name="Majors"/>Little League Majors
+                <tr>
+                    <td> <input type=checkbox checked name="Intermediates"/>Intermediates (BB only)
+				    <td> <input type=checkbox checked name="Juniors"/>Juniors
+                    <td> <input type=checkbox checked name="Seniors"/>Seniors
+                </tr>
 				</table>
 			</div>
 			</div>
-                <br />
+                <br/>
+            <div>Choose sport/associations(check all that apply)
+                <div style="margin-left: .5in">
+                    <table border=0 cellpadding=3>
+                        <tr>
+                            <td> <input type=checkbox checked name="Baseball"/>Baseball
+                            <td> <input type=checkbox checked name="Softball"/>Softball
+                        </tr>
+                        <tr id="idTrFedRules" runat="server">
+                            <td colspan="2"><input type=checkbox name="Fed"/>
+                                NFHS (<i>Fed/High School</i>)</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+                <br/>
+            <div>Choose season type(check all that apply)
+                <div style="margin-left: .5in">
+                    <table border=0 cellpadding=3>
+                        <tr>
+                        <td> <input type=checkbox checked name="Regular"/>Regular Season
+                        <td> <input type=checkbox checked name="Tournament"/>Tournament
+                    </table>
+                </div>
+            </div>
+            <br />
 			<div >
                 Difficulty (choose one more more levels of difficulty)
 			<div style="margin-left:.5in">
@@ -260,12 +299,14 @@
 				</tr>
 				</table>
 				</div></div>
-				<p >
+				<p id="idPLocalRules">
 				Include local league questions for: <select id="idSelect" name="Local">
 				    <OPTION value="None">No local rules</OPTION>
 				    <OPTION value="Redmond West">Redmond West</OPTION>
 				    <OPTION value="Redmond North">Redmond North</OPTION>				    				    
 				</select>
+					</p>
+				<p id="idPShowDebug">
 				Q-Debug-List: <input type="text" name="QDebug" />
 				<input type="hidden" name="quizParms" id="idQuizParms">
 				</p>
